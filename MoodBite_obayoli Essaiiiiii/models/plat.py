@@ -46,10 +46,20 @@ class Plat:
     @classmethod
     def from_dict(cls, data: dict, doc_id: str = "") -> "Plat":
         """Build a Plat from a Firestore document dict."""
+ 
         # Normalize ingredients — Firestore may store as string or array
         ingredients = data.get("ingredients", [])
         if isinstance(ingredients, str):
             ingredients = [i.strip() for i in ingredients.split(",") if i.strip()]
+ 
+        # Normalize photo path — works for both web (Railway) and desktop (.exe)
+        # Accepts: "dishes/x.jpg" or "/static/dishes/x.jpg" or "static/dishes/x.jpg"
+        # Returns always: "dishes/x.jpg" → url_for('static', filename=plat.photo) works everywhere
+        photo_raw = data.get("photo", data.get("image", ""))
+        if photo_raw.startswith("/static/"):
+            photo_raw = photo_raw[len("/static/"):]
+        elif photo_raw.startswith("static/"):
+            photo_raw = photo_raw[len("static/"):]
  
         return cls(
             id=doc_id or data.get("id", ""),
@@ -57,7 +67,7 @@ class Plat:
             categorie=data.get("categorie", data.get("category", "")),
             prix=float(data.get("prix", data.get("price", 0.0))),
             ingredients=ingredients,
-            photo=data.get("photo", data.get("image", "")),
+            photo=photo_raw,
             justification=data.get("justification", data.get("why", "")),
             science=data.get("science", ""),
         )

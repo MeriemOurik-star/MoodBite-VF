@@ -50,7 +50,7 @@ def _resolve_service_account_path() -> str:
  
  
 FIREBASE_SERVICE_ACCOUNT_PATH = _resolve_service_account_path()
-FIREBASE_DATABASE_URL = "https://moodbite-project-2cd7c-default-rtdb.firebaseio.com"
+FIREBASE_DATABASE_URL = "https://moodbite-project-2cd7c-default-rtdb.europe-west1.firebaseio.com"
  
 # ---------------------------------------------------------------------------
 # Flask App Settings
