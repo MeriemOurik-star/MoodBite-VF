@@ -91,7 +91,7 @@
           <article class="dish-slide" data-index="{{ loop.index0 }}" style="display:{% if loop.first %}block{% else %}none{% endif %};border-radius:24px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.12);background:white;border:2px solid {% if plat.id in selected_ids|default([]) %}{{ humeur.color }}{% else %}transparent{% endif %};animation:fadeUp .25s ease forwards">
             <div style="position:relative;height:235px;background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.95),{{ humeur.bg }} 62%,#f2eee6 100%);overflow:hidden;display:flex;align-items:center;justify-content:center">
               <div style="position:absolute;width:170px;height:42px;border-radius:50%;background:rgba(0,0,0,.13);filter:blur(18px);bottom:18px;left:50%;transform:translateX(-50%)"></div>
-              {% if plat.photo %}<img class="dish-photo" src="{{ plat.photo }}" alt="{{ plat.nom }}">{% endif %}
+              {% if plat.photo %}<img class="dish-photo" src="{{ url_for('static', filename=plat.photo) }}" alt="{{ plat.nom }}">{% endif %}
               <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.48),transparent 56%);pointer-events:none"></div>
               <div style="position:absolute;left:16px;right:16px;bottom:14px;display:flex;justify-content:space-between;align-items:end;gap:10px;color:white">
                 <div><div style="font-size:12px;font-weight:800;opacity:.82">{{ plat.categorie }}</div><h2 style="font-size:24px;line-height:1;margin:3px 0 0">{{ plat.nom }}</h2></div>
@@ -199,20 +199,16 @@
   renderCarousel();
   const confirmOrder=document.getElementById('confirmOrder');
   if(confirmOrder){
-confirmOrder.addEventListener('click', async () => {
-  confirmOrder.disabled = true;
-  confirmOrder.textContent = LANG === 'fr' ? 'Envoi en cours...' : 'Sending...';
-  try {
-    const data = await postJSON("{{ url_for('order.confirm_order') }}", {});
-    window.location.href = data.redirect;
-  } catch(error) {
-    // Diag états Commande — état NouvelleCommande : afficher Réessayer
-    confirmOrder.disabled = false;
-    confirmOrder.textContent = LANG === 'fr' ? '⚠️ Réessayer' : '⚠️ Try again';
-    confirmOrder.style.background = '#E4686E';
-    showToast(error.message);
-  }
-});
+    confirmOrder.addEventListener('click',async()=>{
+      confirmOrder.disabled=true;
+      try{
+        const data=await postJSON("{{ url_for('order.confirm_order') }}",{});
+        window.location.href=data.redirect;
+      }catch(error){
+        confirmOrder.disabled=false;
+        showToast(error.message);
+      }
+    });
   }
 </script>
 {% endblock %}
