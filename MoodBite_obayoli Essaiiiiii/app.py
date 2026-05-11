@@ -3,6 +3,7 @@ app.py — MoodBite Flask Entry Point
 """
  
 from flask import Flask, session, redirect, request
+from whitenoise import WhiteNoise
 from config import config, FIREBASE_CONFIG
  
 from controllers.client_controller    import client_bp
@@ -12,6 +13,9 @@ from controllers.dashboard_controller import dashboard_bp
  
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
+ 
+# Serve static files correctly on Railway/Gunicorn
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static')
  
 app.register_blueprint(client_bp)
 app.register_blueprint(mood_bp)
@@ -26,7 +30,6 @@ def switch_lang(lang_code):
     return redirect(request.referrer or "/")
  
 # ── Context processor ────────────────────────────────────────────────────────
-# Injects into EVERY template automatically
 @app.context_processor
 def inject_globals():
     lang = session.get("lang", config.DEFAULT_LANG)
@@ -34,9 +37,10 @@ def inject_globals():
         "lang":            lang,
         "fr":              lang == "fr",
         "firebase_config": FIREBASE_CONFIG,
-        "mood_meta":       config.MOOD_META,        # ← fix: humeur.html needs this
-        "supported_moods": config.SUPPORTED_MOODS,  # ← bonus: might be needed too
+        "mood_meta":       config.MOOD_META,
+        "supported_moods": config.SUPPORTED_MOODS,
     }
  
 if __name__ == "__main__":
     app.run(host=config.HOST, port=config.PORT, debug=config.DEBUG)
+ 
